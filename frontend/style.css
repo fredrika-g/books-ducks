@@ -1,5 +1,5 @@
 :root {
-  --primary: #000;
+  --primary-clr: #000;
   --canvas: #fff;
 }
 
@@ -11,20 +11,20 @@
 
 body {
   font-family: system-ui;
-  color: var(--primary);
+  color: var(--primary-clr);
   background-color: var(--canvas);
 
   &.Light {
-    --primary: hsl(0, 0%, 10%);
+    --primary-clr: hsl(0, 0%, 10%);
     --canvas: hsl(0, 0%, 90%);
   }
   &.Dark {
-    --primary: hsl(0, 0%, 90%);
+    --primary-clr: hsl(0, 0%, 90%);
     --canvas: hsl(0, 0%, 20%);
   }
 
   &.Rainbow {
-    --primary: hsl(240, 100%, 70%);
+    --primary-clr: hsl(240, 100%, 70%);
     --canvas: hsl(350, 100%, 88%);
   }
 }
@@ -66,6 +66,10 @@ header {
   display: none;
 }
 
+.hidden {
+  visibility: hidden;
+}
+
 #login-register {
   max-width: 1100px;
   margin: 0 auto;
@@ -100,5 +104,39 @@ header {
   & button {
     padding: 0.3em 0.6em;
     font-size: 1.1rem;
+  }
+}
+
+#allBooks {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 2rem;
+
+  & .book {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+
+    & .title {
+      max-width: 25ch;
+    }
+
+    & img {
+      width: 100px;
+    }
+
+    & .actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      & button {
+        padding: 0.2em 0.5em;
+      }
+    }
   }
 }

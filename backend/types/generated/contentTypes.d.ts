@@ -379,11 +379,44 @@ export interface ApiBookBook extends Schema.CollectionType {
     numOfPages: Attribute.Integer;
     publishDate: Attribute.Date;
     cover: Attribute.Media;
+    avgGrade: Attribute.Decimal;
+    grades: Attribute.Component<'grade.zero', true>;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<'api::book.book', 'oneToOne', 'admin::user'> &
       Attribute.Private;
     updatedBy: Attribute.Relation<'api::book.book', 'oneToOne', 'admin::user'> &
+      Attribute.Private;
+  };
+}
+
+export interface ApiGradeGrade extends Schema.CollectionType {
+  collectionName: 'grades';
+  info: {
+    singularName: 'grade';
+    pluralName: 'grades';
+    displayName: 'Grade';
+    description: '';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    value: Attribute.Integer;
+    name: Attribute.String;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::grade.grade',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      'api::grade.grade',
+      'oneToOne',
+      'admin::user'
+    > &
       Attribute.Private;
   };
 }
@@ -861,6 +894,7 @@ declare module '@strapi/types' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'api::book.book': ApiBookBook;
+      'api::grade.grade': ApiGradeGrade;
       'api::website.website': ApiWebsiteWebsite;
       'plugin::upload.file': PluginUploadFile;
       'plugin::upload.folder': PluginUploadFolder;

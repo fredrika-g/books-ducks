@@ -1,0 +1,14 @@
+{
+  "collectionName": "components_grade_zeros",
+  "info": {
+    "displayName": "Grade",
+    "icon": "hashtag",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "gradeValue": {
+      "type": "integer"
+    }
+  }
+}

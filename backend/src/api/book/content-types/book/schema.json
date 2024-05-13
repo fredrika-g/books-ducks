@@ -27,11 +27,20 @@
       "type": "date"
     },
     "cover": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
       "allowedTypes": [
         "images"
-      ],
-      "type": "media",
-      "multiple": false
+      ]
+    },
+    "avgGrade": {
+      "type": "decimal"
+    },
+    "grades": {
+      "type": "component",
+      "repeatable": true,
+      "component": "grade.zero"
     }
   }
 }

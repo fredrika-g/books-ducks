@@ -91,6 +91,7 @@ const register = async () => {
   }
 };
 
+// log out
 const logout = () => {
   sessionStorage.removeItem("token");
   sessionStorage.removeItem("user");
@@ -111,10 +112,104 @@ const renderPage = () => {
     let user = JSON.parse(sessionStorage.getItem("user")).username;
 
     usernameDisplay.innerText = `Current User: ${user}`;
+
+    getAllBooks();
   } else {
     userMenu.classList.add("display-none");
     loginSection.classList.remove("display-none");
     homePageContent.classList.add("display-none");
     usernameDisplay.innerText = "";
+
+    getAllBooks();
   }
+};
+
+const getAllBooks = async () => {
+  let response = await axios.get(
+    "http://localhost:1337/api/books?populate=deep,2"
+  );
+
+  let books = response.data.data;
+  console.log(books);
+
+  document.querySelector("#allBooks").innerHTML = "";
+
+  books.forEach((book) => {
+    let bookDiv = document.createElement("div");
+    bookDiv.classList.add("book");
+    bookDiv.dataset.id = `${book.id}`;
+
+    let bookInfo = document.createElement("div");
+    bookInfo.innerHTML = `<p class="title">${book.attributes.title}</p>
+    <p class="author">${book.attributes.author}</p>
+    <p class="date">${book.attributes.publishDate}</p>
+    <p class="grade">Avg Grade</p>`;
+
+    if (sessionStorage.getItem("token")) {
+      let actions = document.createElement("div");
+      actions.classList.add("actions");
+
+      // add to personal list btn
+      let addBtn = document.createElement("button");
+      addBtn.classList.add("addToReadBtn");
+      addBtn.innerText = "+ My List";
+
+      // grade book btn
+      let gradeBtn = document.createElement("button");
+      gradeBtn.classList.add("gradeBookBtn");
+      gradeBtn.innerText = "Grade";
+
+      //   let gradeDiv = document.createElement("div");
+      //   gradeDiv.classList.add("gradeDiv");
+      //   let gradeSelect = document.createElement("select");
+
+      //   for (let i = 0; i < 10; i++) {
+      //     gradeSelect.innerHTML += `<option value="${i + 1}">${i + 1}</option>`;
+      //   }
+      //   gradeDiv.append(gradeSelect);
+      //   gradeSelect.classList.add("hidden");
+
+      actions.append(addBtn, gradeBtn);
+      bookInfo.append(actions);
+    }
+
+    bookDiv.append(bookInfo);
+    bookDiv.innerHTML += `<img src="http://localhost:1337${book.attributes.cover.data.attributes.url}" alt="${book.attributes.title} Cover"/>`;
+    document.querySelector("#allBooks").append(bookDiv);
+  });
+
+  //   adding event listeners
+  if (sessionStorage.getItem("token")) {
+    document.querySelectorAll(".addToReadBtn").forEach((button) => {
+      button.addEventListener("click", (e) => {
+        addToPersonalList(e.target.closest(".book").dataset.id);
+      });
+    });
+    document.querySelectorAll(".gradeBookBtn").forEach((button) => {
+      button.addEventListener("click", (e) => {
+        gradeBook(e.target.closest(".book").dataset.id);
+      });
+    });
+  }
+};
+
+// adding book to personal list
+const addToPersonalList = async (bookId) => {
+  let user = JSON.parse(sessionStorage.getItem("user"));
+  let response = await axios.put(
+    `http://localhost:1337/api/users/${user.id}`,
+    {
+      booksToRead: { connect: [bookId] },
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+      },
+    }
+  );
+  console.log("Book Added to List!");
+};
+
+const gradeBook = (bookId) => {
+  console.log(bookId);
 };

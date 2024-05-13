@@ -1,0 +1,28 @@
+{
+  "kind": "singleType",
+  "collectionName": "websites",
+  "info": {
+    "singularName": "website",
+    "pluralName": "websites",
+    "displayName": "Website",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "colorTheme": {
+      "type": "enumeration",
+      "enum": [
+        "Light",
+        "Dark",
+        "Rainbow"
+      ],
+      "default": "Light"
+    }
+  }
+}

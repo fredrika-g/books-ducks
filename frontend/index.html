@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Ducks - Book Store</title>
+    <link rel="stylesheet" href="style.css" />
+    <!-- font awesome -->
+    <script
+      src="https://kit.fontawesome.com/159b2b3760.js"
+      crossorigin="anonymous"
+    ></script>
+    <!-- axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- regular javascript -->
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1></h1>
+        <span></span>
+      </div>
+      <div class="user-menu display-none">
+        <ul>
+          <li><a href="#">My To Read List</a></li>
+          <li><a href="#">My Profile</a></li>
+          <li><button>Log Out</button></li>
+        </ul>
+      </div>
+    </header>
+    <main>
+      <section id="login-register" class="display-none">
+        <!-- log in section -->
+        <div>
+          <h2>Log In Existing User</h2>
+          <div>
+            <label for="identifier">Username OR Email</label>
+            <input
+              type="text"
+              id="identifier"
+              placeholder="Username or Email"
+            />
+          </div>
+          <div>
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Password" />
+          </div>
+          <button id="loginBtn">Log In</button>
+          <span id="loginMsg"></span>
+        </div>
+
+        <!-- register new user section -->
+        <div>
+          <h2>Register New User</h2>
+          <div>
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="Username" />
+          </div>
+          <div>
+            <label for="email">Email</label>
+            <input type="text" id="email" placeholder="Email" />
+          </div>
+          <div>
+            <label for="registerPassword">Password</label>
+            <input
+              type="password"
+              id="registerPassword"
+              placeholder="Password"
+            />
+          </div>
+          <button id="registerBtn">Register</button>
+          <span id="registerMsg"></span>
+        </div>
+      </section>
+
+      <!-- logged in view -->
+
+      <section id="homepageContent" class="display-none"></section>
+    </main>
+    <footer></footer>
+  </body>
+</html>

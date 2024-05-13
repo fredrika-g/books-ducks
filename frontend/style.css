@@ -1,0 +1,104 @@
+:root {
+  --primary: #000;
+  --canvas: #fff;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui;
+  color: var(--primary);
+  background-color: var(--canvas);
+
+  &.Light {
+    --primary: hsl(0, 0%, 10%);
+    --canvas: hsl(0, 0%, 90%);
+  }
+  &.Dark {
+    --primary: hsl(0, 0%, 90%);
+    --canvas: hsl(0, 0%, 20%);
+  }
+
+  &.Rainbow {
+    --primary: hsl(240, 100%, 70%);
+    --canvas: hsl(350, 100%, 88%);
+  }
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+
+  & h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  & span {
+    font-weight: 600;
+    font-size: 1.5rem;
+  }
+
+  & ul {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    gap: 0.75rem;
+
+    & a,
+    & button {
+      font-size: 1.1rem;
+    }
+  }
+
+  & button {
+    padding: 0.2em 0.5em;
+  }
+}
+
+.display-none {
+  display: none;
+}
+
+#login-register {
+  max-width: 1100px;
+  margin: 0 auto;
+
+  & > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+
+    & div {
+      width: 25%;
+      min-width: 200px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+
+      & * {
+        font-size: 1.1rem;
+      }
+    }
+  }
+
+  & > div:nth-child(2) {
+    margin-top: 3rem;
+  }
+
+  & input {
+    padding: 0.3rem 0.4rem;
+  }
+
+  & button {
+    padding: 0.3em 0.6em;
+    font-size: 1.1rem;
+  }
+}

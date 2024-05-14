@@ -1,6 +1,6 @@
 :root {
   --primary-clr: #000;
-  --canvas: #fff;
+  --canvas-clr: #fff;
 }
 
 * {
@@ -11,21 +11,21 @@
 
 body {
   font-family: system-ui;
-  color: var(--primary-clr);
-  background-color: var(--canvas);
+  color: var(--primary-clr) !important;
+  background-color: var(--canvas-clr) !important;
 
   &.Light {
     --primary-clr: hsl(0, 0%, 10%);
-    --canvas: hsl(0, 0%, 90%);
+    --canvas-clr: hsl(0, 0%, 90%);
   }
   &.Dark {
     --primary-clr: hsl(0, 0%, 90%);
-    --canvas: hsl(0, 0%, 20%);
+    --canvas-clr: hsl(0, 0%, 20%);
   }
 
   &.Rainbow {
     --primary-clr: hsl(240, 100%, 70%);
-    --canvas: hsl(350, 100%, 88%);
+    --canvas-clr: hsl(350, 100%, 88%);
   }
 }
 

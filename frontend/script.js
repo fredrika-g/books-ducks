@@ -23,6 +23,14 @@ let usernameDisplay = document.querySelector("header span");
 let userMenu = document.querySelector(".user-menu");
 let logoutBtn = userMenu.querySelector("button");
 
+//variables - modal
+let gradeModal = document.querySelector("#gradeBookModal");
+// const myModal = new bootstrap.Modal(document.getElementById('myModal'), options)
+// or
+// const gradeModal = new bootstrap.Modal("#gradeBookModal");
+let saveGradeBtn = document.querySelector("#saveGradeBtn");
+let gradeSelect = document.querySelector("#gradeSelect");
+
 // info about the store
 
 window.addEventListener("load", async () => {
@@ -158,16 +166,9 @@ const getAllBooks = async () => {
       let gradeBtn = document.createElement("button");
       gradeBtn.classList.add("gradeBookBtn");
       gradeBtn.innerText = "Grade";
-
-      //   let gradeDiv = document.createElement("div");
-      //   gradeDiv.classList.add("gradeDiv");
-      //   let gradeSelect = document.createElement("select");
-
-      //   for (let i = 0; i < 10; i++) {
-      //     gradeSelect.innerHTML += `<option value="${i + 1}">${i + 1}</option>`;
-      //   }
-      //   gradeDiv.append(gradeSelect);
-      //   gradeSelect.classList.add("hidden");
+      gradeBtn.dataset.bookid = book.id;
+      gradeBtn.dataset.bsToggle = "modal";
+      gradeBtn.dataset.bsTarget = "#gradeBookModal";
 
       actions.append(addBtn, gradeBtn);
       bookInfo.append(actions);
@@ -187,7 +188,7 @@ const getAllBooks = async () => {
     });
     document.querySelectorAll(".gradeBookBtn").forEach((button) => {
       button.addEventListener("click", (e) => {
-        gradeBook(e.target.closest(".book").dataset.id);
+        gradeModal.dataset.bookId = e.target.closest(".book").dataset.id;
       });
     });
   }
@@ -212,4 +213,93 @@ const addToPersonalList = async (bookId) => {
 
 const gradeBook = (bookId) => {
   console.log(bookId);
+};
+
+// populating data in modal when opened
+gradeModal.addEventListener("shown.bs.modal", async () => {
+  // getting id of chosen book
+  let bookId = gradeModal.dataset.bookId;
+  console.log(bookId);
+
+  // getting book info
+  let response = await axios.get(`http://localhost:1337/api/books/${bookId}`, {
+    headers: {
+      Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+    },
+  });
+
+  let bookInfo = response.data.data.attributes;
+
+  gradeModal.querySelector("h1").innerText = `Grade ${bookInfo.title}`;
+});
+
+gradeModal.addEventListener("hidden.bs.modal", () => {
+  gradeModal.querySelector("h1").innerText = "";
+});
+
+saveGradeBtn.addEventListener("click", async () => {
+  if (gradeSelect.value) {
+    await saveGrade();
+  } else {
+    console.log("Choose a grade first!");
+  }
+});
+
+const saveGrade = async () => {
+  let grade = gradeSelect.value;
+  let bookId = gradeModal.dataset.bookId;
+
+  let gradeObj = { gradeValue: grade };
+
+  let bookResponse1 = await axios.get(
+    `http://localhost:1337/api/books/${bookId}?populate=deep,2`,
+    {
+      headers: {
+        Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+      },
+    }
+  );
+
+  let thisBookGrades = bookResponse1.data.data.attributes.grades;
+  console.log(thisBookGrades);
+  // adding chosen grade to the book in strapi
+  let bookResponse = await axios.put(
+    `http://localhost:1337/api/books/${bookId}`,
+    {
+      data: { grades: [gradeObj] },
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+      },
+    }
+  );
+
+  console.log(bookResponse.data);
+};
+
+// populate modal
+const populateModal = () => {
+  gradeModal.querySelector(
+    ".modal-body"
+  ).innerHTML = `<label for="gradeSelect">Give Your Grade</label>
+    <select id="gradeSelect>
+        <option value="" disabled selected>Choose 1-10</option>
+         <option value="0">0</option>
+         <option value="1">1</option>
+         <option value="2">2</option>
+         <option value="3">3</option>
+         <option value="4">4</option>
+         <option value="5">5</option>
+         <option value="6">6</option>
+         <option value="7">7</option>
+         <option value="8">8</option>
+         <option value="9">9</option>
+         <option value="10">10</option>
+    </select>"`;
+
+  let saveGradeBtn = gradeModal.querySelector(
+    ".modal-footer button:nth-child(2)"
+  );
+  console.log(saveGradeBtn);
 };

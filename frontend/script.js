@@ -219,7 +219,6 @@ const gradeBook = (bookId) => {
 gradeModal.addEventListener("shown.bs.modal", async () => {
   // getting id of chosen book
   let bookId = gradeModal.dataset.bookId;
-  console.log(bookId);
 
   // getting book info
   let response = await axios.get(`http://localhost:1337/api/books/${bookId}`, {
@@ -246,12 +245,14 @@ saveGradeBtn.addEventListener("click", async () => {
 });
 
 const saveGrade = async () => {
-  let grade = gradeSelect.value;
+  // turning selected grade into an object
+  let grade = { grade: gradeSelect.value };
+  console.log("Grade:", grade);
+  // getting the chosen books id
   let bookId = gradeModal.dataset.bookId;
-
-  let gradeObj = { gradeValue: grade };
-
-  let bookResponse1 = await axios.get(
+  console.log("Book ID:", bookId);
+  // getting the book in its current state to get grades array
+  let currentResponse = await axios.get(
     `http://localhost:1337/api/books/${bookId}?populate=deep,2`,
     {
       headers: {
@@ -260,13 +261,18 @@ const saveGrade = async () => {
     }
   );
 
-  let thisBookGrades = bookResponse1.data.data.attributes.grades;
-  console.log(thisBookGrades);
-  // adding chosen grade to the book in strapi
+  // saving the grades array
+  let thisBookGrades = currentResponse.data.data.attributes.gradesList;
+  console.log("Old thisBookGrades:", thisBookGrades);
+  // pushing the new grade to grade array
+  thisBookGrades.push(grade);
+  console.log("Updated thisBookGrades:", thisBookGrades);
+
+  // adding chosen grade to the book in strapi with updated grade array
   let bookResponse = await axios.put(
-    `http://localhost:1337/api/books/${bookId}`,
+    `http://localhost:1337/api/books/${bookId}?populate=deep,2`,
     {
-      data: { grades: [gradeObj] },
+      data: { gradesList: thisBookGrades },
     },
     {
       headers: {
@@ -275,31 +281,72 @@ const saveGrade = async () => {
     }
   );
 
-  console.log(bookResponse.data);
+  // updating average grade
+
+  // saving book to users graded books array
+
+  axios
+    .get(`http://localhost:1337/api/users/me?populate=deep,2`, {
+      headers: {
+        Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+      },
+    })
+    .then(async (response) => {
+      // saving current graded books array in variable
+      let gradedBooks = response.data.gradedBooks;
+      console.log("User's old gradedBooks:", gradedBooks);
+
+      let newBook = {
+        book: bookId,
+        myGrade: gradeSelect.value,
+        bookId: bookId,
+      };
+      console.log("New Graded Book:", newBook);
+
+      gradedBooks.push(newBook);
+      console.log("Updated gradedBooks:", gradedBooks);
+
+      // getting current user id
+      let userId = JSON.parse(sessionStorage.getItem("user")).id;
+
+      let newResponse = await axios.put(
+        `http://localhost:1337/api/users/${userId}?populate=deep,2`,
+        {
+          gradedBooks: gradedBooks,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      console.log("New response:", newResponse.data);
+    });
 };
 
 // populate modal
-const populateModal = () => {
-  gradeModal.querySelector(
-    ".modal-body"
-  ).innerHTML = `<label for="gradeSelect">Give Your Grade</label>
-    <select id="gradeSelect>
-        <option value="" disabled selected>Choose 1-10</option>
-         <option value="0">0</option>
-         <option value="1">1</option>
-         <option value="2">2</option>
-         <option value="3">3</option>
-         <option value="4">4</option>
-         <option value="5">5</option>
-         <option value="6">6</option>
-         <option value="7">7</option>
-         <option value="8">8</option>
-         <option value="9">9</option>
-         <option value="10">10</option>
-    </select>"`;
+// const populateModal = () => {
+//   gradeModal.querySelector(
+//     ".modal-body"
+//   ).innerHTML = `<label for="gradeSelect">Give Your Grade</label>
+//     <select id="gradeSelect>
+//         <option value="" disabled selected>Choose 1-10</option>
+//          <option value="0">0</option>
+//          <option value="1">1</option>
+//          <option value="2">2</option>
+//          <option value="3">3</option>
+//          <option value="4">4</option>
+//          <option value="5">5</option>
+//          <option value="6">6</option>
+//          <option value="7">7</option>
+//          <option value="8">8</option>
+//          <option value="9">9</option>
+//          <option value="10">10</option>
+//     </select>"`;
 
-  let saveGradeBtn = gradeModal.querySelector(
-    ".modal-footer button:nth-child(2)"
-  );
-  console.log(saveGradeBtn);
-};
+//   let saveGradeBtn = gradeModal.querySelector(
+//     ".modal-footer button:nth-child(2)"
+//   );
+//   console.log(saveGradeBtn);
+// };

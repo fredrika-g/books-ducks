@@ -1,14 +1,14 @@
 {
-  "collectionName": "components_grade_zeros",
+  "collectionName": "components_test_grade_testgrades",
   "info": {
     "displayName": "Grade",
-    "icon": "hashtag",
+    "icon": "book",
     "description": ""
   },
   "options": {},
   "attributes": {
-    "gradeValue": {
-      "type": "integer"
+    "grade": {
+      "type": "json"
     }
   }
 }

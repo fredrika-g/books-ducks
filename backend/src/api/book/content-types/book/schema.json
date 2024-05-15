@@ -37,10 +37,10 @@
     "avgGrade": {
       "type": "decimal"
     },
-    "grades": {
+    "gradesList": {
       "type": "component",
       "repeatable": true,
-      "component": "grade.zero"
+      "component": "grades.testgrade"
     }
   }
 }

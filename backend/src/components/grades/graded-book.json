@@ -1,0 +1,22 @@
+{
+  "collectionName": "components_grades_graded_books",
+  "info": {
+    "displayName": "Graded Book",
+    "icon": "book",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "myGrade": {
+      "type": "integer"
+    },
+    "book": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::book.book"
+    },
+    "bookId": {
+      "type": "integer"
+    }
+  }
+}

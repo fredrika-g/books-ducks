@@ -69,6 +69,11 @@
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::book.book"
+    },
+    "gradedBooks": {
+      "type": "component",
+      "repeatable": true,
+      "component": "grades.graded-book"
     }
   }
 }

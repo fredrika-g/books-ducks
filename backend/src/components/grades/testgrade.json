@@ -9,6 +9,9 @@
   "attributes": {
     "grade": {
       "type": "json"
+    },
+    "userId": {
+      "type": "integer"
     }
   }
 }

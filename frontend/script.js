@@ -138,7 +138,6 @@ const getAllBooks = async () => {
   );
 
   let books = response.data.data;
-  console.log(books);
 
   document.querySelector("#allBooks").innerHTML = "";
 
@@ -211,10 +210,6 @@ const addToPersonalList = async (bookId) => {
   console.log("Book Added to List!");
 };
 
-const gradeBook = (bookId) => {
-  console.log(bookId);
-};
-
 // populating data in modal when opened
 gradeModal.addEventListener("shown.bs.modal", async () => {
   // getting id of chosen book
@@ -245,14 +240,16 @@ saveGradeBtn.addEventListener("click", async () => {
 });
 
 const saveGrade = async () => {
+  // getting current user id
+  let userId = JSON.parse(sessionStorage.getItem("user")).id;
+
   // turning selected grade into an object
-  let grade = { grade: gradeSelect.value };
-  console.log("Grade:", grade);
+  let grade = { grade: gradeSelect.value, userId: userId };
   // getting the chosen books id
   let bookId = gradeModal.dataset.bookId;
-  console.log("Book ID:", bookId);
+
   // getting the book in its current state to get grades array
-  let currentResponse = await axios.get(
+  let bookResponse = await axios.get(
     `http://localhost:1337/api/books/${bookId}?populate=deep,2`,
     {
       headers: {
@@ -261,30 +258,10 @@ const saveGrade = async () => {
     }
   );
 
-  // saving the grades array
-  let thisBookGrades = currentResponse.data.data.attributes.gradesList;
-  console.log("Old thisBookGrades:", thisBookGrades);
-  // pushing the new grade to grade array
-  thisBookGrades.push(grade);
-  console.log("Updated thisBookGrades:", thisBookGrades);
+  //  grade array to compare with
+  let currentBookGradesList = bookResponse.data.data.attributes.gradesList;
 
-  // adding chosen grade to the book in strapi with updated grade array
-  let bookResponse = await axios.put(
-    `http://localhost:1337/api/books/${bookId}?populate=deep,2`,
-    {
-      data: { gradesList: thisBookGrades },
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-      },
-    }
-  );
-
-  // updating average grade
-
-  // saving book to users graded books array
-
+  // 1. checking if user has graded book before
   axios
     .get(`http://localhost:1337/api/users/me?populate=deep,2`, {
       headers: {
@@ -292,27 +269,64 @@ const saveGrade = async () => {
       },
     })
     .then(async (response) => {
-      // saving current graded books array in variable
+      // saving current graded books array in variable using the response from GET request above
       let gradedBooks = response.data.gradedBooks;
-      console.log("User's old gradedBooks:", gradedBooks);
 
+      // creating object out of chosen book grade to pass to api
       let newBook = {
         book: bookId,
         myGrade: gradeSelect.value,
         bookId: bookId,
       };
-      console.log("New Graded Book:", newBook);
 
-      gradedBooks.push(newBook);
-      console.log("Updated gradedBooks:", gradedBooks);
+      // filtering current array of graded books to check for already existing book
+      let duplicateCheckUserArr = gradedBooks.filter((a) => {
+        return a.bookId == bookId;
+      });
 
-      // getting current user id
-      let userId = JSON.parse(sessionStorage.getItem("user")).id;
+      // initializing the users grade array
+      let updatedGradedBooks;
 
-      let newResponse = await axios.put(
-        `http://localhost:1337/api/users/${userId}?populate=deep,2`,
+      // initializing books grades array
+      let updatedBookGrades;
+
+      if (duplicateCheckUserArr.length > 0) {
+        // (if book already exists, update the grade of instance)
+        console.log("Boken redan recenserad!");
+
+        // assigning value to users grade array
+        updatedGradedBooks = gradedBooks.map((book) => {
+          if (book.bookId == bookId) {
+            return newBook;
+          } else {
+            return book;
+          }
+        });
+
+        // updated thisBookGrades: first checking if user has graded this book before, if so, delete previous grade
+        updatedBookGrades = currentBookGradesList.map((book) => {
+          if (book.userId == userId) {
+            return grade;
+          } else {
+            return book;
+          }
+        });
+      } else {
+        // (if book doesnt exist, push newBook to array)
+        console.log("Boken är inte recenserad!");
+        gradedBooks.push(newBook);
+        // assigning value to users grade array
+        updatedGradedBooks = [...gradedBooks];
+
+        updatedBookGrades = [...currentBookGradesList];
+        updatedBookGrades.push(grade);
+      }
+
+      // adding chosen grade to the book in strapi with updated grade array
+      let newBookResponse = await axios.put(
+        `http://localhost:1337/api/books/${bookId}?populate=deep,2`,
         {
-          gradedBooks: gradedBooks,
+          data: { gradesList: updatedBookGrades },
         },
         {
           headers: {
@@ -321,32 +335,19 @@ const saveGrade = async () => {
         }
       );
 
-      console.log("New response:", newResponse.data);
-    });
+      // updating users grade array in strapi
+      await axios.put(
+        `http://localhost:1337/api/users/${userId}?populate=deep,2`,
+        {
+          gradedBooks: updatedGradedBooks,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+          },
+        }
+      );
+    }); /*end of .then()*/
+
+  // updating average grade
 };
-
-// populate modal
-// const populateModal = () => {
-//   gradeModal.querySelector(
-//     ".modal-body"
-//   ).innerHTML = `<label for="gradeSelect">Give Your Grade</label>
-//     <select id="gradeSelect>
-//         <option value="" disabled selected>Choose 1-10</option>
-//          <option value="0">0</option>
-//          <option value="1">1</option>
-//          <option value="2">2</option>
-//          <option value="3">3</option>
-//          <option value="4">4</option>
-//          <option value="5">5</option>
-//          <option value="6">6</option>
-//          <option value="7">7</option>
-//          <option value="8">8</option>
-//          <option value="9">9</option>
-//          <option value="10">10</option>
-//     </select>"`;
-
-//   let saveGradeBtn = gradeModal.querySelector(
-//     ".modal-footer button:nth-child(2)"
-//   );
-//   console.log(saveGradeBtn);
-// };

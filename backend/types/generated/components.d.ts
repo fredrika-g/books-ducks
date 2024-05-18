@@ -27,6 +27,7 @@ export interface GradesTestgrade extends Schema.Component {
   };
   attributes: {
     grade: Attribute.JSON;
+    userId: Attribute.Integer;
   };
 }
 

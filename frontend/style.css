@@ -60,6 +60,11 @@ header {
   & button {
     padding: 0.2em 0.5em;
   }
+
+  & a {
+    text-decoration: none;
+    color: #000;
+  }
 }
 
 .display-none {
@@ -138,5 +143,9 @@ header {
         padding: 0.2em 0.5em;
       }
     }
+  }
+
+  &.display-none {
+    display: none;
   }
 }

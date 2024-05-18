@@ -1,6 +1,7 @@
 // index.html content
 let loginSection = document.querySelector("#login-register");
-let homePageContent = document.querySelector("#homepageContent");
+let allBooksContent = document.querySelector("#allBooks");
+let profilePageContent = document.querySelector("#profilePageContent");
 
 // variables - log in
 let identifierInput = document.querySelector("#identifier");
@@ -21,6 +22,8 @@ let usernameDisplay = document.querySelector("header span");
 
 // variables - header
 let userMenu = document.querySelector(".user-menu");
+let showBooksLink = document.querySelector("#showBooksLink");
+let showProfileLink = document.querySelector("#showProfileLink");
 let logoutBtn = userMenu.querySelector("button");
 
 //variables - modal
@@ -53,11 +56,26 @@ const login = async () => {
 
     if (response.request.status === 200) {
       sessionStorage.setItem("token", response.data.jwt);
-      sessionStorage.setItem("user", JSON.stringify(response.data.user));
+
+      // getting full user data
+      let fullUserResponse = await axios.get(
+        "http://localhost:1337/api/users/me?populate=deep,2",
+        {
+          headers: {
+            Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      // setting user in session storage to the full response
+      sessionStorage.setItem("user", JSON.stringify(fullUserResponse.data));
 
       // clearing input fields
       identifierInput.value = "";
       passwordInput.value = "";
+
+      // setting starting page to Books page
+      sessionStorage.setItem("page", "books");
 
       renderPage();
     }
@@ -101,8 +119,7 @@ const register = async () => {
 
 // log out
 const logout = () => {
-  sessionStorage.removeItem("token");
-  sessionStorage.removeItem("user");
+  sessionStorage.clear();
 
   renderPage();
 };
@@ -115,17 +132,24 @@ const renderPage = () => {
   if (sessionStorage.getItem("token")) {
     userMenu.classList.remove("display-none");
     loginSection.classList.add("display-none");
-    homePageContent.classList.remove("display-none");
 
     let user = JSON.parse(sessionStorage.getItem("user")).username;
 
     usernameDisplay.innerText = `Current User: ${user}`;
 
-    getAllBooks();
+    if (sessionStorage.getItem("page") === "books") {
+      allBooksContent.classList.remove("display-none");
+      profilePageContent.classList.add("display-none");
+      getAllBooks();
+    } else {
+      allBooksContent.classList.add("display-none");
+      profilePageContent.classList.remove("display-none");
+      showProfile();
+    }
   } else {
     userMenu.classList.add("display-none");
     loginSection.classList.remove("display-none");
-    homePageContent.classList.add("display-none");
+    profilePageContent.classList.add("display-none");
     usernameDisplay.innerText = "";
 
     getAllBooks();
@@ -133,13 +157,14 @@ const renderPage = () => {
 };
 
 const getAllBooks = async () => {
+  profilePageContent.classList.add("display-none");
   let response = await axios.get(
     "http://localhost:1337/api/books?populate=deep,2"
   );
 
   let books = response.data.data;
 
-  document.querySelector("#allBooks").innerHTML = "";
+  allBooksContent.innerHTML = "";
 
   books.forEach((book) => {
     let bookDiv = document.createElement("div");
@@ -150,7 +175,11 @@ const getAllBooks = async () => {
     bookInfo.innerHTML = `<p class="title">${book.attributes.title}</p>
     <p class="author">${book.attributes.author}</p>
     <p class="date">${book.attributes.publishDate}</p>
-    <p class="grade">Avg Grade</p>`;
+    <p class="grade">${
+      book.attributes.avgGrade
+        ? `Avg Grade ${book.attributes.avgGrade}`
+        : "Avg Grade -"
+    }</p>`;
 
     if (sessionStorage.getItem("token")) {
       let actions = document.createElement("div");
@@ -175,7 +204,7 @@ const getAllBooks = async () => {
 
     bookDiv.append(bookInfo);
     bookDiv.innerHTML += `<img src="http://localhost:1337${book.attributes.cover.data.attributes.url}" alt="${book.attributes.title} Cover"/>`;
-    document.querySelector("#allBooks").append(bookDiv);
+    allBooksContent.append(bookDiv);
   });
 
   //   adding event listeners
@@ -229,6 +258,7 @@ gradeModal.addEventListener("shown.bs.modal", async () => {
 
 gradeModal.addEventListener("hidden.bs.modal", () => {
   gradeModal.querySelector("h1").innerText = "";
+  gradeSelect.querySelector("option").selected = true;
 });
 
 saveGradeBtn.addEventListener("click", async () => {
@@ -261,7 +291,7 @@ const saveGrade = async () => {
   //  grade array to compare with
   let currentBookGradesList = bookResponse.data.data.attributes.gradesList;
 
-  // 1. checking if user has graded book before
+  // checking if user has graded book before
   axios
     .get(`http://localhost:1337/api/users/me?populate=deep,2`, {
       headers: {
@@ -322,11 +352,20 @@ const saveGrade = async () => {
         updatedBookGrades.push(grade);
       }
 
-      // adding chosen grade to the book in strapi with updated grade array
+      // updating average grade
+      let allGrades = 0;
+      updatedBookGrades.forEach((gradeObj) => {
+        allGrades += +gradeObj.grade;
+      });
+
+      let averageGrade = allGrades / updatedBookGrades.length;
+      console.log(averageGrade);
+
+      // adding chosen grade to the book in strapi with updated grade array and updating book grade average
       let newBookResponse = await axios.put(
         `http://localhost:1337/api/books/${bookId}?populate=deep,2`,
         {
-          data: { gradesList: updatedBookGrades },
+          data: { gradesList: updatedBookGrades, avgGrade: averageGrade },
         },
         {
           headers: {
@@ -349,5 +388,27 @@ const saveGrade = async () => {
       );
     }); /*end of .then()*/
 
-  // updating average grade
+  getAllBooks();
 };
+
+const showProfile = () => {
+  // getting current user
+  let user = JSON.parse(sessionStorage.getItem("user"));
+
+  // breaking out user content
+  let { username, booksToRead, gradedBooks } = user;
+};
+
+// profile page
+showProfileLink.addEventListener("click", () => {
+  sessionStorage.setItem("page", "profile");
+
+  renderPage();
+});
+
+// showing Books page
+showBooksLink.addEventListener("click", () => {
+  sessionStorage.setItem("page", "books");
+
+  renderPage();
+});

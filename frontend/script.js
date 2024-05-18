@@ -26,11 +26,17 @@ let showBooksLink = document.querySelector("#showBooksLink");
 let showProfileLink = document.querySelector("#showProfileLink");
 let logoutBtn = userMenu.querySelector("button");
 
+// variables - profile page
+let toReadUL = document.querySelector("#toReadUL");
+let gradedBooksUL = document.querySelector("#gradedBooksUL");
+
+let toReadSorter = document.querySelector("#toReadSorter");
+let gradedBooksSorter = document.querySelector("#gradedBooksSorter");
+
+let usersGradedBooks = [];
+
 //variables - modal
 let gradeModal = document.querySelector("#gradeBookModal");
-// const myModal = new bootstrap.Modal(document.getElementById('myModal'), options)
-// or
-// const gradeModal = new bootstrap.Modal("#gradeBookModal");
 let saveGradeBtn = document.querySelector("#saveGradeBtn");
 let gradeSelect = document.querySelector("#gradeSelect");
 
@@ -386,17 +392,112 @@ const saveGrade = async () => {
           },
         }
       );
+
+      // getting updated user info and updating session storage
+      let updatedUser = await axios.get(
+        "http://localhost:1337/api/users/me?populate=deep,2",
+        {
+          headers: {
+            Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+          },
+        }
+      );
+      console.log(updatedUser.data);
+
+      sessionStorage.setItem("user", JSON.stringify(updatedUser.data));
     }); /*end of .then()*/
 
   getAllBooks();
 };
 
-const showProfile = () => {
+const sortAlphabetically = (arr, property) => {
+  let array = [...arr];
+
+  array.sort((a, b) => {
+    return a[property].localeCompare(b[property]);
+  });
+
+  return array;
+};
+
+const sortNumerically = (arr, property) => {
+  let array = [...arr];
+
+  array.sort((a, b) => {
+    return a.gradeInfo[property] - b.gradeInfo[property];
+  });
+
+  return array;
+};
+
+const renderToReads = (toReadList) => {
+  toReadUL.innerHTML = "";
+
+  toReadList.forEach((book) => {
+    toReadUL.innerHTML += `<li class="list-group-item d-flex align-items-center justify-content-between gap-3">
+    <div class="d-flex flex-column">
+    <p class="fw-bold">${book.title}</p>
+    <p class="fst-italic">by ${book.author}</p>
+    </div>
+    <button class="btn btn-sm removeToRead" data-bookId="${book.id}"><i class="fa fa-solid fa-trash"></i></button>
+    </li>`;
+  });
+};
+
+const renderGradedBooks = (gradedBooksList) => {
+  gradedBooksUL.innerHTML = "";
+
+  gradedBooksList.forEach((book) => {
+    let { myGrade } = book.gradeInfo;
+    let { title, author } = book.bookInfo;
+    gradedBooksUL.innerHTML += `<li class="list-group-item"><div class="d-flex flex-column">
+    <p class="fw-bold">${title}</p>
+    <p class="fst-italic">by ${author}</p>
+    <p>My Grade: ${myGrade}</p>
+    </div></li>`;
+  });
+};
+
+const showProfile = async () => {
+  // resetting array
+  usersGradedBooks = [];
   // getting current user
   let user = JSON.parse(sessionStorage.getItem("user"));
 
   // breaking out user content
   let { username, booksToRead, gradedBooks } = user;
+
+  // showing user's to read list
+  renderToReads(booksToRead);
+
+  // getting graded books info
+
+  let promises = [];
+
+  gradedBooks.forEach((book) => {
+    promises.push(
+      axios.get(`http://localhost:1337/api/books/${book.bookId}`, {
+        headers: {
+          Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+        },
+      })
+    );
+  });
+
+  let gradedBooksRequests = await Promise.all(promises);
+
+  gradedBooks.forEach((bookGrade) => {
+    gradedBooksRequests.forEach((request) => {
+      if (request.data.data.id === +bookGrade.bookId) {
+        usersGradedBooks.push({
+          gradeInfo: bookGrade,
+          bookInfo: request.data.data.attributes,
+        });
+      }
+    });
+  });
+
+  renderGradedBooks(usersGradedBooks);
 };
 
 // profile page
@@ -411,4 +512,30 @@ showBooksLink.addEventListener("click", () => {
   sessionStorage.setItem("page", "books");
 
   renderPage();
+});
+
+toReadSorter.addEventListener("change", () => {
+  let toReadList = JSON.parse(sessionStorage.getItem("user")).booksToRead;
+  let sortedBooks = sortAlphabetically(toReadList, toReadSorter.value);
+
+  // showing user's to read list
+  renderToReads(sortedBooks);
+});
+
+gradedBooksSorter.addEventListener("change", () => {
+  let sortedBooks = [...usersGradedBooks];
+
+  if (gradedBooksSorter.value == "myGrade") {
+    sortedBooks.sort((a, b) => {
+      return a.gradeInfo.myGrade - b.gradeInfo.myGrade;
+    });
+  } else {
+    sortedBooks.sort((a, b) => {
+      return a.bookInfo[gradedBooksSorter.value].localeCompare(
+        b.bookInfo[gradedBooksSorter.value]
+      );
+    });
+  }
+
+  renderGradedBooks(sortedBooks);
 });

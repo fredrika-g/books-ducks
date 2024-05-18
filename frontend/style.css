@@ -149,3 +149,9 @@ header {
     display: none;
   }
 }
+
+#profilePageContent {
+  & article {
+    min-width: 300px;
+  }
+}

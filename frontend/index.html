@@ -88,8 +88,29 @@
 
       <!-- logged in view -->
       <section id="allBooks"></section>
-      <section id="profilePageContent" >
+      <section id="profilePageContent" class="mx-4">
         <h2>My Profile</h2>
+        <div class="d-flex flex-wrap gap-5 justify-content-center">
+          <article>
+            <h3>To Read</h3>
+            <select id="toReadSorter" class="form-select">
+              <option value="" disabled selected>Sort by</option>
+              <option value="title">Title</option>
+              <option value="author">Author</option>
+            </select>
+            <ul class="list-group" id="toReadUL"></ul>
+          </article>
+          <article>
+            <h3>Read & Graded</h3>
+            <select id="gradedBooksSorter" class="form-select">
+              <option value="" disabled selected>Sort by</option>
+              <option value="title">Title</option>
+              <option value="author">Author</option>
+              <option value="myGrade">My Grade</option>
+            </select>
+            <ul class="list-group" id="gradedBooksUL"></ul>
+          </article>
+        </div>
       </section>
     </main>
     <footer></footer>

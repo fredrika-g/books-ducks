@@ -4,19 +4,20 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Book Ducks - Book Store</title>
-    <link rel="stylesheet" href="style.css" />
     <!-- bootstrap -->
     <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-      crossorigin="anonymous"
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+    crossorigin="anonymous"
     />
     <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-      crossorigin="anonymous"
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"
     ></script>
+    <!-- own styling -->
+    <link rel="stylesheet" href="style.css" />
     <!-- font awesome -->
     <script
       src="https://kit.fontawesome.com/159b2b3760.js"
@@ -35,9 +36,9 @@
       </div>
       <div class="user-menu display-none">
         <ul>
-          <li><a id="showBooksLink" href="#">Books</a></li>
-          <li><a id="showProfileLink" href="#">My Profile</a></li>
-          <li><button>Log Out</button></li>
+          <li><a id="showBooksLink"  href="#">Books</a></li>
+          <li><a id="showProfileLink"  href="#">My Profile</a></li>
+          <li><button class="btn btn-outline-secondary"><i class="fa-solid fa-right-from-bracket"></i></button></li>
         </ul>
       </div>
     </header>
@@ -47,18 +48,19 @@
         <div>
           <h2>Log In Existing User</h2>
           <div>
-            <label for="identifier">Username OR Email</label>
+            <label for="identifier" class="form-label">Username OR Email</label>
             <input
               type="text"
               id="identifier"
               placeholder="Username or Email"
+              class="form-control"
             />
           </div>
           <div>
-            <label for="password">Password</label>
-            <input type="password" id="password" placeholder="Password" />
+            <label for="password" class="form-label">Password</label>
+            <input type="password" id="password" placeholder="Password" class="form-control" />
           </div>
-          <button id="loginBtn">Log In</button>
+          <button id="loginBtn" class="btn btn-primary">Log In</button>
           <span id="loginMsg"></span>
         </div>
 
@@ -66,22 +68,22 @@
         <div>
           <h2>Register New User</h2>
           <div>
-            <label for="username">Username</label>
-            <input type="text" id="username" placeholder="Username" />
+            <label for="username" class="form-label">Username</label>
+            <input type="text" id="username" placeholder="Username" class="form-control"/>
           </div>
           <div>
-            <label for="email">Email</label>
-            <input type="text" id="email" placeholder="Email" />
+            <label for="email" class="form-label">Email</label>
+            <input type="text" id="email" placeholder="Email" class="form-control"/>
           </div>
           <div>
-            <label for="registerPassword">Password</label>
+            <label for="registerPassword" class="form-label">Password</label>
             <input
               type="password"
               id="registerPassword"
               placeholder="Password"
-            />
+            class="form-control"/>
           </div>
-          <button id="registerBtn">Register</button>
+          <button id="registerBtn" class="btn btn-primary">Register</button>
           <span id="registerMsg"></span>
         </div>
       </section>
@@ -136,8 +138,8 @@
           </div>
           <div class="modal-body">
             <form>
-              <label for="gradeSelect">Select Your Grade</label>
-              <select id="gradeSelect" required>
+              <label for="gradeSelect" class="form-label">Select Your Grade</label>
+              <select id="gradeSelect" class="form-control"required>
                 <option value="" disabled selected>Choose 1-10</option>
                 <option value="0">0</option>
                 <option value="1">1</option>
@@ -160,7 +162,7 @@
                 >
                 Close
             </button>
-            <button type="button" id="saveGradeBtn" class="btn btn-primary">Save changes</button>
+            <button type="button" id="saveGradeBtn" class="btn btn-primary">Save Grade</button>
         </form>
           </div>
         </div>

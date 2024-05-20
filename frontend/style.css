@@ -1,6 +1,10 @@
 :root {
   --primary-clr: #000;
   --canvas-clr: #fff;
+
+  --primary-btn: rgb(209, 48, 153);
+  --primary-btn-hover: rgb(123, 65, 103);
+  --primary-btn-hover-color: rgb(245, 236, 242);
 }
 
 * {
@@ -21,6 +25,10 @@ body {
   &.Dark {
     --primary-clr: hsl(0, 0%, 90%);
     --canvas-clr: hsl(0, 0%, 20%);
+
+    --primary-btn: rgb(95, 188, 146);
+    --primary-btn-hover: rgb(28, 116, 77);
+    --primary-btn-hover-color: rgb(254, 254, 254);
   }
 
   &.Rainbow {
@@ -52,8 +60,10 @@ header {
     gap: 0.75rem;
 
     & a,
-    & button {
-      font-size: 1.1rem;
+    & button,
+    & i {
+      font-size: 1.3rem;
+      color: var(--primary-clr) !important;
     }
   }
 
@@ -73,6 +83,31 @@ header {
 
 .hidden {
   visibility: hidden;
+}
+
+.btn-outline-primary {
+  border-color: var(--primary-btn) !important;
+  color: var(--primary-btn) !important;
+
+  &:hover,
+  &:focus-visible {
+    background-color: var(--primary-btn-hover) !important;
+    color: var(--primary-btn-hover-color) !important;
+  }
+}
+.btn-primary {
+  border-color: var(--primary-btn) !important;
+  background-color: var(--primary-btn) !important;
+
+  &:hover,
+  &:focus-visible {
+    background-color: var(--primary-btn-hover) !important;
+    color: var(--primary-btn-hover-color) !important;
+  }
+}
+
+.modal :not(button) {
+  color: #000;
 }
 
 #login-register {
@@ -117,14 +152,18 @@ header {
   margin: 0 auto;
   padding: 2rem;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 2rem;
 
   & .book {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.75rem;
+    padding: 0.75rem;
+    font-size: 1.2rem;
+    border-radius: 0.5rem;
+    border: 1px solid black;
 
     & .title {
       max-width: 25ch;
@@ -141,6 +180,7 @@ header {
 
       & button {
         padding: 0.2em 0.5em;
+        font-size: 1.2rem;
       }
     }
   }

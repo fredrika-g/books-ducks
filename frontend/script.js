@@ -134,6 +134,21 @@ registerBtn.addEventListener("click", register);
 loginBtn.addEventListener("click", login);
 logoutBtn.addEventListener("click", logout);
 
+const updateCurrentUser = async () => {
+  // getting user info
+  let response = await axios.get(
+    "http://localhost:1337/api/users/me?populate=deep,2",
+    {
+      headers: {
+        Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+      },
+    }
+  );
+
+  // updating user in session storage
+  sessionStorage.setItem("user", JSON.stringify(response.data));
+};
+
 const renderPage = () => {
   if (sessionStorage.getItem("token")) {
     userMenu.classList.remove("display-none");
@@ -178,9 +193,11 @@ const getAllBooks = async () => {
     bookDiv.dataset.id = `${book.id}`;
 
     let bookInfo = document.createElement("div");
-    bookInfo.innerHTML = `<p class="title">${book.attributes.title}</p>
+    bookInfo.innerHTML = `<p class="title fs-4 fw-medium">${
+      book.attributes.title
+    }</p>
     <p class="author">${book.attributes.author}</p>
-    <p class="date">${book.attributes.publishDate}</p>
+    <p class="date fst-italic">${book.attributes.publishDate}</p>
     <p class="grade">${
       book.attributes.avgGrade
         ? `Avg Grade ${book.attributes.avgGrade}`
@@ -193,12 +210,23 @@ const getAllBooks = async () => {
 
       // add to personal list btn
       let addBtn = document.createElement("button");
-      addBtn.classList.add("addToReadBtn");
-      addBtn.innerText = "+ My List";
+      addBtn.classList.add(
+        "addToReadBtn",
+        "btn",
+        "btn-sm",
+        "btn-outline-primary"
+      );
+      addBtn.innerHTML = '<i class="fa-solid fa-plus"></i>';
+      addBtn.title = "Add to My List";
 
       // grade book btn
       let gradeBtn = document.createElement("button");
-      gradeBtn.classList.add("gradeBookBtn");
+      gradeBtn.classList.add(
+        "gradeBookBtn",
+        "btn",
+        "btn-sm",
+        "btn-outline-primary"
+      );
       gradeBtn.innerText = "Grade";
       gradeBtn.dataset.bookid = book.id;
       gradeBtn.dataset.bsToggle = "modal";
@@ -232,7 +260,7 @@ const getAllBooks = async () => {
 const addToPersonalList = async (bookId) => {
   let user = JSON.parse(sessionStorage.getItem("user"));
   let response = await axios.put(
-    `http://localhost:1337/api/users/${user.id}`,
+    `http://localhost:1337/api/users/${user.id}?populate=deep,2`,
     {
       booksToRead: { connect: [bookId] },
     },
@@ -242,7 +270,9 @@ const addToPersonalList = async (bookId) => {
       },
     }
   );
-  console.log("Book Added to List!");
+
+  // updating user in session storage
+  await updateCurrentUser();
 };
 
 // populating data in modal when opened
@@ -393,21 +423,48 @@ const saveGrade = async () => {
         }
       );
 
-      // getting updated user info and updating session storage
-      let updatedUser = await axios.get(
-        "http://localhost:1337/api/users/me?populate=deep,2",
-        {
-          headers: {
-            Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-          },
-        }
-      );
-      console.log(updatedUser.data);
-
-      sessionStorage.setItem("user", JSON.stringify(updatedUser.data));
+      //  updating current user in session storage
+      await updateCurrentUser();
+      // updating books display
+      await getAllBooks();
     }); /*end of .then()*/
+};
 
-  getAllBooks();
+const removeBook = async (bookId) => {
+  let user = JSON.parse(sessionStorage.getItem("user"));
+
+  // current user to reads
+  let currentList = user.booksToRead;
+
+  // removing chosen book from to reads
+  let editedList = currentList.filter((book) => {
+    return +book.id !== +bookId;
+  });
+
+  // placing ids of the current books in array to pass to API through PUT
+  let editedListIds = editedList.map((book) => book.id);
+
+  // updating strapi
+  await axios.put(
+    `http://localhost:1337/api/users/${user.id}?populate=deep,2`,
+    {
+      booksToRead: editedListIds,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+      },
+    }
+  );
+
+  // update session storage
+  await updateCurrentUser();
+
+  // getting updated to read list to pass to renderToReads function
+  let updatedUserToReads = JSON.parse(
+    sessionStorage.getItem("user")
+  ).booksToRead;
+  await renderToReads(updatedUserToReads);
 };
 
 const sortAlphabetically = (arr, property) => {
@@ -430,22 +487,35 @@ const sortNumerically = (arr, property) => {
   return array;
 };
 
-const renderToReads = (toReadList) => {
+const renderToReads = async (toReadList) => {
   toReadUL.innerHTML = "";
 
-  toReadList.forEach((book) => {
-    toReadUL.innerHTML += `<li class="list-group-item d-flex align-items-center justify-content-between gap-3">
-    <div class="d-flex flex-column">
-    <p class="fw-bold">${book.title}</p>
-    <p class="fst-italic">by ${book.author}</p>
-    </div>
-    <button class="btn btn-sm removeToRead" data-bookId="${book.id}"><i class="fa fa-solid fa-trash"></i></button>
-    </li>`;
-  });
+  await updateCurrentUser();
+
+  if (toReadList.length > 0) {
+    toReadList.forEach((book) => {
+      toReadUL.innerHTML += `<li class="list-group-item d-flex align-items-center justify-content-between gap-3">
+      <div class="d-flex flex-column">
+      <p class="fw-bold">${book.title}</p>
+      <p class="fst-italic">by ${book.author}</p>
+      </div>
+      <button class="btn btn-sm removeToRead" data-bookId="${book.id}"><i class="fa fa-solid fa-trash"></i></button>
+      </li>`;
+    });
+
+    toReadUL.querySelectorAll(".removeToRead").forEach((button) => {
+      button.addEventListener("click", async (e) => {
+        let bookId = e.target.closest(".removeToRead").dataset.bookid;
+        await removeBook(bookId);
+      });
+    });
+  }
 };
 
-const renderGradedBooks = (gradedBooksList) => {
+const renderGradedBooks = async (gradedBooksList) => {
   gradedBooksUL.innerHTML = "";
+
+  await updateCurrentUser();
 
   gradedBooksList.forEach((book) => {
     let { myGrade } = book.gradeInfo;

@@ -40,6 +40,10 @@ let gradeModal = document.querySelector("#gradeBookModal");
 let saveGradeBtn = document.querySelector("#saveGradeBtn");
 let gradeSelect = document.querySelector("#gradeSelect");
 
+let myGradeModal = new bootstrap.Modal("#gradeBookModal", {
+  keyboard: false,
+});
+
 // info about the store
 
 window.addEventListener("load", async () => {
@@ -100,25 +104,36 @@ const login = async () => {
 
 // register
 const register = async () => {
-  // register functionality
-  let response = await axios.post(
-    "http://localhost:1337/api/auth/local/register",
-    {
-      username: usernameInput.value,
-      email: emailInput.value,
-      password: registerPasswordInput.value,
+  let allFilledIn =
+    usernameInput.value && emailInput.value && registerPasswordInput.value;
+
+  if (allFilledIn) {
+    // register functionality
+    let response = await axios.post(
+      "http://localhost:1337/api/auth/local/register",
+      {
+        username: usernameInput.value,
+        email: emailInput.value,
+        password: registerPasswordInput.value,
+      }
+    );
+
+    if (response.status === 200) {
+      document.querySelector("#registerMsg").innerText =
+        "Registered Successfully!";
+
+      setTimeout(() => {
+        document.querySelector("#registerMsg").innerText = "";
+        usernameInput.value = "";
+        emailInput.value = "";
+        registerPasswordInput.value = "";
+      }, 4000);
     }
-  );
-
-  if (response.status === 200) {
+  } else {
     document.querySelector("#registerMsg").innerText =
-      "Registered Successfully!";
-
+      "All fields are required!";
     setTimeout(() => {
       document.querySelector("#registerMsg").innerText = "";
-      usernameInput.value = "";
-      emailInput.value = "";
-      registerPasswordInput.value = "";
     }, 4000);
   }
 };
@@ -200,7 +215,7 @@ const getAllBooks = async () => {
     <p class="date fst-italic">${book.attributes.publishDate}</p>
     <p class="grade">${
       book.attributes.avgGrade
-        ? `Avg Grade ${book.attributes.avgGrade}`
+        ? `Avg Grade ${Math.round(book.attributes.avgGrade * 10) / 10}`
         : "Avg Grade -"
     }</p>`;
 
@@ -246,6 +261,13 @@ const getAllBooks = async () => {
     document.querySelectorAll(".addToReadBtn").forEach((button) => {
       button.addEventListener("click", (e) => {
         addToPersonalList(e.target.closest(".book").dataset.id);
+
+        let thisButton = e.target.closest(".addToReadBtn");
+        thisButton.innerHTML = '<i class="fa-solid fa-check"></i>';
+
+        setTimeout(() => {
+          thisButton.innerHTML = '<i class="fa-solid fa-plus"></i>';
+        }, 3000);
       });
     });
     document.querySelectorAll(".gradeBookBtn").forEach((button) => {
@@ -300,8 +322,6 @@ gradeModal.addEventListener("hidden.bs.modal", () => {
 saveGradeBtn.addEventListener("click", async () => {
   if (gradeSelect.value) {
     await saveGrade();
-  } else {
-    console.log("Choose a grade first!");
   }
 });
 
@@ -358,7 +378,6 @@ const saveGrade = async () => {
 
       if (duplicateCheckUserArr.length > 0) {
         // (if book already exists, update the grade of instance)
-        console.log("Boken redan recenserad!");
 
         // assigning value to users grade array
         updatedGradedBooks = gradedBooks.map((book) => {
@@ -379,7 +398,7 @@ const saveGrade = async () => {
         });
       } else {
         // (if book doesnt exist, push newBook to array)
-        console.log("Boken är inte recenserad!");
+
         gradedBooks.push(newBook);
         // assigning value to users grade array
         updatedGradedBooks = [...gradedBooks];
@@ -395,7 +414,6 @@ const saveGrade = async () => {
       });
 
       let averageGrade = allGrades / updatedBookGrades.length;
-      console.log(averageGrade);
 
       // adding chosen grade to the book in strapi with updated grade array and updating book grade average
       let newBookResponse = await axios.put(
@@ -427,6 +445,9 @@ const saveGrade = async () => {
       await updateCurrentUser();
       // updating books display
       await getAllBooks();
+
+      // closing modal
+      myGradeModal.hide();
     }); /*end of .then()*/
 };
 
